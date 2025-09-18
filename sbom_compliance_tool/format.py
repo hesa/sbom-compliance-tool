@@ -30,12 +30,13 @@ class SBoMReportFormatterMarkdown(SBoMReportFormatter):
         lines.append('# Compliance report')
         lines.append('')
         lines.append(f'## Summary')
-        lines.append(f'')
-        lines.append(f'## Details')
-        lines.append(f'* name {report["name"]}')
-        lines.append(f'* version {report["version"]}')
-        lines.append(f'* otbound license {report["license"]}')
+        lines.append(f'* name: {report["name"]}')
+        lines.append(f'* version: {report["version"]}')
+        lines.append(f'* otbound license: {report["license"]}')
+        lines.append(f'* compatibility: {report["compatibility"]}')
         lines.append('')
+        lines.append(f'## Details')
+        lines.append(f'')
         lines.append(f'### Dependencies ')
         for dep in report['dependencies']:
             lines.append('')
@@ -44,10 +45,7 @@ class SBoMReportFormatterMarkdown(SBoMReportFormatter):
             lines.append(f'* version: {dep["version"]}')
             lines.append(f'* license: {dep["license"]}')
             lines.append(f'* compatibility: {dep["compatibility"]}')
-            lines.append(f'* compatibility details: {json.dumps(dep['compatibility_details']['compatibility_report'], indent=4)}')
+            #lines.append(f'* compatibility details: {json.dumps(dep['compatibility_details']['compatibility_report'], indent=4)}')
             
 
-
         return "\n".join(lines)
-
-    
