@@ -16,4 +16,4 @@ then
     ARGS="verify -il MIT -ol \"MIT OR X11\""
 fi     
 
-PYTHONPATH=${EXTRA_PYTHONPATH}:${PYTHONPATH} ${SCRIPT_DIR}/sbom_compliance_tool/__main__.py -v
+PYTHONPATH=${EXTRA_PYTHONPATH}:${PYTHONPATH} ${SCRIPT_DIR}/sbom_compliance_tool/__main__.py  $*
