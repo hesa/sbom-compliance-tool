@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: 2025 Henrik Sandklef
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+SCRIPT_DIR=$(dirname ${BASH_SOURCE[0]})/../
+
+if [ "$1" = "--local" ]
+then
+    shift
+    EXTRA_PYTHONPATH=:${SCRIPT_DIR}/../licomp:${SCRIPT_DIR}/../licomp-osadl:${SCRIPT_DIR}/../licomp-reclicense:${SCRIPT_DIR}/../licomp-proprietary:${SCRIPT_DIR}/../licomp-hermione:${SCRIPT_DIR}/../licomp-dwheeler:${SCRIPT_DIR}/../licomp-gnuguide:${SCRIPT_DIR}/../licomp-toolkit
+fi     
+if [ "$1" = "" ]
+then
+    ARGS="verify -il MIT -ol \"MIT OR X11\""
+fi     
+
+PYTHONPATH=${EXTRA_PYTHONPATH}:${PYTHONPATH} ${SCRIPT_DIR}/sbom_compliance_tool/__main__.py  $*
