@@ -1,8 +1,6 @@
 #!/bin/env python3
 
-#!/bin/env python3
-
-# SPDX-FileCopyrightText: 2024 Henrik Sandklef
+# SPDX-FileCopyrightText: 2025 Henrik Sandklef
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
