@@ -22,3 +22,5 @@ build:
 lint:
 	PYTHONPATH=. flake8 sbom_compliance_tool
 
+test:
+	echo no test at the moment
