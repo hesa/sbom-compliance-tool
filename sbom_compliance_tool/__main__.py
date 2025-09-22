@@ -14,6 +14,11 @@ import sys
 from sbom_compliance_tool.sbom import SBoMReaderFactory
 from sbom_compliance_tool.format import SBoMReportFormatterFactory
 
+from licomp.interface import UseCase
+from licomp.interface import Provisioning
+from licomp.interface import Modification
+
+
 def main():
 
     args = get_args()
@@ -25,7 +30,10 @@ def main():
     reader = SBoMReaderFactory.reader()
     logging.debug(f'Reader: {reader}')
         
-    report = reader.check_file('example-data/normalized-project.json')
+    report = reader.check_file('example-data/normalized-project.json',
+                               UseCase.usecase_to_string(UseCase.LIBRARY),
+                               Provisioning.provisioning_to_string(Provisioning.BIN_DIST),
+                               Modification.modification_to_string(Modification.UNMODIFIED))
     logging.debug(f'Report: {report}')
 
     formatter = SBoMReportFormatterFactory.formatter(args.output_format)
