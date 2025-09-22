@@ -44,7 +44,7 @@ class SBoMReader():
             'license': outbound,
         }
 
-        resources = ['licomp_reclicense', 'licomp_osadl', 'licomp_proprietary', ]
+        resources = ['licomp_reclicense', 'licomp_osadl', 'licomp_proprietary']
         compat_checker = ExpressionExpressionChecker()
         deps = []
         top_compat = None
@@ -56,22 +56,18 @@ class SBoMReader():
                                                             provisioning,
                                                             resources)
 
-            
             new_dep = dep.copy()
             compat = dep_compat['compatibility']
             new_dep['compatibility'] = compat
             new_dep['compatibility_details'] = dep_compat
             deps.append(new_dep)
             top_compat = self.update_compat(top_compat, compat)
-#            print("compat: " + str(compat) + "   --> " + str(top_compat))
-            
+
         report['compatibility'] = top_compat
         report['dependencies'] = deps
 
         return report
-        
-        
+
     def check_file(self, file_name, usecase, provisioning, modified):
         with open(file_name) as fp:
             return self.check_data(json.load(fp), usecase, provisioning, modified)
-        

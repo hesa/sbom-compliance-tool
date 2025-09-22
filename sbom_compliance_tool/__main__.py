@@ -4,7 +4,6 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from argparse import RawTextHelpFormatter
 import argparse
 import logging
 import sys
@@ -20,14 +19,14 @@ from licomp.interface import Modification
 def main():
 
     args = get_args()
-    
+
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
     logging.debug("SBoM Compliance Tool")
 
     reader = SBoMReaderFactory.reader()
     logging.debug(f'Reader: {reader}')
-        
+
     report = reader.check_file('example-data/normalized-project.json',
                                UseCase.usecase_to_string(UseCase.LIBRARY),
                                Provisioning.provisioning_to_string(Provisioning.BIN_DIST),
@@ -36,9 +35,8 @@ def main():
 
     formatter = SBoMReportFormatterFactory.formatter(args.output_format)
     formatted_report = formatter.format(report)
-    
+
     print(formatted_report)
-    
 
 def get_parser():
     parser = argparse.ArgumentParser(prog="sbom-....",
@@ -49,7 +47,7 @@ def get_parser():
     parser.add_argument('-of', '--output-format',
                         type=str,
                         default='json')
-    
+
     parser.add_argument('-v', '--verbose',
                         action='store_true',
                         default=False)
@@ -66,5 +64,3 @@ def get_args():
 
 if __name__ == '__main__':
     sys.exit(main())
-
-
