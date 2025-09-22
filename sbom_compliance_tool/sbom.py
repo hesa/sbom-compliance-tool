@@ -21,10 +21,10 @@ class SBoMReader():
         _map = {
             None: 0,
             'yes': 1,
-            'no': 2,
-            'mixed': 3,
+            'mixed': 2,
+            'depends': 3,
             'unsupported': 4,
-            'depends': 5,
+            'no': 5,
         }
         p_current = _map[current]
         p_new = _map[new]
