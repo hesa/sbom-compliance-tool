@@ -1,0 +1,24 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: licomp
+Upstream-Contact: Henrik Sandklef <hesa@sandklef.com>
+Source: https://github.com/hesa/licomp
+
+Files: .github/**
+Copyright: Henrik Sandklef
+License: GPL-3.0-or-later
+
+Files: .gitignore
+Copyright: Henrik Sandklef
+License: GPL-3.0-or-later
+
+Files: README* docs/*.md
+Copyright: Henrik Sandklef
+License: GPL-3.0-or-later
+
+Files: README* requirements*.txt
+Copyright: Henrik Sandklef
+License: GPL-3.0-or-later
+
+Files: example-data/normalized-project.json
+Copyright: Henrik Sandklef
+License: GPL-3.0-or-later
