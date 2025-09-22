@@ -2,10 +2,6 @@ import json
 
 from licomp_toolkit.toolkit import ExpressionExpressionChecker
 
-from licomp.interface import UseCase
-from licomp.interface import Provisioning
-
-
 class SBoMReaderFactory():
 
     @staticmethod
@@ -26,7 +22,9 @@ class SBoMReader():
             None: 0,
             'yes': 1,
             'no': 2,
-            'depends': 3,
+            'mixed': 3,
+            'unsupported': 4,
+            'depends': 5,
         }
         p_current = _map[current]
         p_new = _map[new]
@@ -34,7 +32,7 @@ class SBoMReader():
             return new
         return current
 
-    def check_data(self, sbom_content):
+    def check_data(self, sbom_content, usecase, provisioning, modified):
         outbound = sbom_content["license"]
         report = {
             'name': sbom_content["name"],
@@ -42,6 +40,7 @@ class SBoMReader():
             'license': outbound,
         }
 
+        resources = ['licomp_reclicense', 'licomp_osadl', 'licomp_proprietary', ]
         compat_checker = ExpressionExpressionChecker()
         deps = []
         top_compat = None
@@ -49,8 +48,10 @@ class SBoMReader():
             inbound = dep["license"]
             dep_compat = compat_checker.check_compatibility(outbound,
                                                             inbound,
-                                                            UseCase.usecase_to_string(UseCase.LIBRARY),
-                                                            Provisioning.provisioning_to_string(Provisioning.BIN_DIST))
+                                                            usecase,
+                                                            provisioning,
+                                                            resources)
+
             
             new_dep = dep.copy()
             compat = dep_compat['compatibility']
@@ -66,7 +67,7 @@ class SBoMReader():
         return report
         
         
-    def check_file(self, file_name):
+    def check_file(self, file_name, usecase, provisioning, modified):
         with open(file_name) as fp:
-            return self.check_data(json.load(fp))
+            return self.check_data(json.load(fp), usecase, provisioning, modified)
         
