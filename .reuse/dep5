@@ -11,6 +11,10 @@ Files: .gitignore
 Copyright: Henrik Sandklef
 License: GPL-3.0-or-later
 
+Files: .bumpversion.cfg
+Copyright: Henrik Sandklef
+License: GPL-3.0-or-later
+
 Files: README* docs/*.md
 Copyright: Henrik Sandklef
 License: GPL-3.0-or-later
