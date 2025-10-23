@@ -26,7 +26,7 @@ def main():
 
     reader = SBoMReaderFactory.reader()
     logging.debug(f'Reader: {reader}')
-    
+
     report = reader.check_file(args.sbom_file,
                                UseCase.usecase_to_string(UseCase.LIBRARY),
                                Provisioning.provisioning_to_string(Provisioning.BIN_DIST),
@@ -45,8 +45,7 @@ def get_parser():
                                      formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument("sbom_file")
-    
-    
+
     parser.add_argument('-of', '--output-format',
                         type=str,
                         default='json')
