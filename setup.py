@@ -28,11 +28,11 @@ setuptools.setup(
     long_description=_long_description,
     long_description_content_type="text/markdown",
     license_files=('LICENSES/GPL-3.0-or-later.txt',),
-    url="https://github.com/hesa/licomp-toolkit",
+    url="https://github.com/hesa/sbom-compliance-tool",
     packages=['sbom_compliance_tool'],
     entry_points={
         "console_scripts": [
-            "licomp-toolkit = sbom_compliance_tool.__main__:main",
+            "sbom_compliance_tool = sbom_compliance_tool.__main__:main",
         ],
     },
     package_data={
