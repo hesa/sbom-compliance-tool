@@ -2,17 +2,14 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import json
-
 from licomp_toolkit.toolkit import ExpressionExpressionChecker
 from flame.license_db import FossLicenses
-
 
 class SBoMCompatibility():
 
     def __init__(self):
         self.flame = FossLicenses()
-    
+
     def update_compat(self, current, new):
         _map = {
             None: 0,
@@ -55,7 +52,7 @@ class SBoMCompatibility():
                 dep_compat = {
                     'compatibility': 'missing-license',
                 }
-                    
+
             new_dep = dep.copy()
             compat = dep_compat['compatibility']
             new_dep['compatibility'] = compat

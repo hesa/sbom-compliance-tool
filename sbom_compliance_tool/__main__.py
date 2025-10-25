@@ -7,7 +7,6 @@
 import argparse
 import logging
 import sys
-import json
 
 from sbom_compliance_tool.compliance_tool import SBoMComplianceTool
 from sbom_compliance_tool.format import SBoMReportFormatterFactory
@@ -29,18 +28,10 @@ def main():
     compliance = SBoMComplianceTool()
     logging.debug(f'Tool: {compliance}')
 
-    #
-    # draft usage
-    #
-    
-    #compliance.from_sbom_file('bom.json')
     compliance.from_sbom_file(args.sbom_file)
-    #compliance.from_sbom_file('bom.json')
-    
-    # to debug 
+
     normalized_sbom = compliance.normalized_sbom()
-    #print(str(normalized_sbom))
-    
+
     compatibility = SBoMCompatibility()
     report = compatibility.compatibility_report(normalized_sbom,
                                                 UseCase.usecase_to_string(UseCase.LIBRARY),

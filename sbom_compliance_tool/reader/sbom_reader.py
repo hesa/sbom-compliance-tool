@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
-from xml.etree import ElementTree
+from defusedxml import ElementTree
 from enum import Enum
 
 class SBoMComplianceTags(Enum):
@@ -13,7 +13,7 @@ class SBoMComplianceTags(Enum):
     USECASE = 'usecase'
     DEPENENCIES = 'dependencies'
     LICENSE_OP_AND = 'AND'
-    
+
 class SBoMReader:
 
     def normalize_sbom_file(self, filename):
@@ -34,13 +34,13 @@ class SBoMReader:
     def _read_xml(self, file_path):
         with open(file_path, 'r', encoding='utf-8') as fp:
             xml_data = fp.read()
-            return ElementTree.fromstring(xml_data)
-        
+            return ElementTree.fromstring(xml_data, forbid_dtd=True)
+
     def _read_json(self, file_path):
         with open(file_path, 'r', encoding='utf-8') as fp:
             data = json.load(fp)
             return data
-        
+
     def _sub_component(self, name, version, usecase, licenses):
         return {
             SBoMComplianceTags.NAME.value: name,
@@ -48,10 +48,11 @@ class SBoMReader:
             SBoMComplianceTags.USECASE.value: usecase,
             SBoMComplianceTags.LICENSE.value: self.summarize_licenses(licenses),
         }
-        
+
     def _meta(self):
         return {
-            'format': 'SBoM Compliance Tool',
+            'format': 'sbom-compliance-tool',
+            'format_version': '0.1',
             'original_format': self.supported_bom(),
         }
 
@@ -62,8 +63,6 @@ class SBoMReader:
                 SBoMComplianceTags.NAME.value: name,
                 SBoMComplianceTags.VERSION.value: version,
                 SBoMComplianceTags.LICENSE.value: self.summarize_licenses(licenses),
-                SBoMComplianceTags.DEPENENCIES.value: dependencies
-            }
+                SBoMComplianceTags.DEPENENCIES.value: dependencies,
+            },
         }
-
-    

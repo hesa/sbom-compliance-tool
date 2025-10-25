@@ -2,20 +2,17 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import logging
+import json
 
 from sbom_compliance_tool.reader.sbom_reader import SBoMReader
 
-from cyclonedx.model.bom import Bom
-
 class NativeSBoMReader(SBoMReader):
 
-    def normalize_sbom_file(self, filename):
-        with open(file_name) as fp:
-            print("HER....")
+    def normalize_sbom_file(self, file_path):
+        with open(file_path) as fp:
             data = json.load(fp)
-            print("HER....")
-            assert data['meta']['slsl']
+            if data['meta']['format'] != 'sbom-compliance-tool':
+                raise Exception(f'{file_path} not in SBoM Compliance Tool\'s native format')
             return self.normalize_sbom_data(data)
 
     def normalize_sbom_data(self, data):
@@ -27,6 +24,3 @@ class NativeSBoMReader(SBoMReader):
 
     def supported_sbom(self):
         return "SBoM Compliance Tool"
-
-    
-    
