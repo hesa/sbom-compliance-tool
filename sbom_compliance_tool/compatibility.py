@@ -2,24 +2,13 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import json
-
 from licomp_toolkit.toolkit import ExpressionExpressionChecker
+from flame.license_db import FossLicenses
 
-class SBoMReaderFactory():
-
-    @staticmethod
-    def reader():
-        return SBoMReader()
-
-class SBoMReader():
+class SBoMCompatibility():
 
     def __init__(self):
-        pass
-
-    def __read(self, file_name):
-        with open(file_name) as fp:
-            return json.load(fp)
+        self.flame = FossLicenses()
 
     def update_compat(self, current, new):
         _map = {
@@ -29,6 +18,7 @@ class SBoMReader():
             'depends': 3,
             'unsupported': 4,
             'no': 5,
+            'missing-license': 6,
         }
         p_current = _map[current]
         p_new = _map[new]
@@ -36,7 +26,8 @@ class SBoMReader():
             return new
         return current
 
-    def check_data(self, sbom_content, usecase, provisioning, modified):
+    def compatibility_report(self, sbom, usecase, provisioning, modified):
+        sbom_content = sbom['sbom']
         outbound = sbom_content["license"]
         report = {
             'name': sbom_content["name"],
@@ -48,13 +39,19 @@ class SBoMReader():
         compat_checker = ExpressionExpressionChecker()
         deps = []
         top_compat = None
-        for dep in sbom_content["dependencies"]:
-            inbound = dep["license"]
-            dep_compat = compat_checker.check_compatibility(outbound,
-                                                            inbound,
-                                                            usecase,
-                                                            provisioning,
-                                                            resources)
+        for dep in sbom_content['dependencies']:
+            inbound = dep['license']
+            usecase = dep.get('usecase', usecase)
+            if inbound:
+                dep_compat = compat_checker.check_compatibility(self.flame.expression_license(outbound, update_dual=False)['identified_license'],
+                                                                self.flame.expression_license(inbound, update_dual=False)['identified_license'],
+                                                                usecase,
+                                                                provisioning,
+                                                                resources)
+            else:
+                dep_compat = {
+                    'compatibility': 'missing-license',
+                }
 
             new_dep = dep.copy()
             compat = dep_compat['compatibility']
@@ -67,7 +64,3 @@ class SBoMReader():
         report['dependencies'] = deps
 
         return report
-
-    def check_file(self, file_name, usecase, provisioning, modified):
-        with open(file_name) as fp:
-            return self.check_data(json.load(fp), usecase, provisioning, modified)

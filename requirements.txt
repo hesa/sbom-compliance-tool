@@ -1,3 +1,4 @@
 licomp_toolkit
 licomp
 foss_flame
+cyclonedx-bom

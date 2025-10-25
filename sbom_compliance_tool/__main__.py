@@ -8,8 +8,9 @@ import argparse
 import logging
 import sys
 
-from sbom_compliance_tool.sbom import SBoMReaderFactory
+from sbom_compliance_tool.compliance_tool import SBoMComplianceTool
 from sbom_compliance_tool.format import SBoMReportFormatterFactory
+from sbom_compliance_tool.compatibility import SBoMCompatibility
 
 from licomp.interface import UseCase
 from licomp.interface import Provisioning
@@ -24,13 +25,18 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
     logging.debug("SBoM Compliance Tool")
 
-    reader = SBoMReaderFactory.reader()
-    logging.debug(f'Reader: {reader}')
+    compliance = SBoMComplianceTool()
+    logging.debug(f'Tool: {compliance}')
 
-    report = reader.check_file(args.sbom_file,
-                               UseCase.usecase_to_string(UseCase.LIBRARY),
-                               Provisioning.provisioning_to_string(Provisioning.BIN_DIST),
-                               Modification.modification_to_string(Modification.UNMODIFIED))
+    compliance.from_sbom_file(args.sbom_file)
+
+    normalized_sbom = compliance.normalized_sbom()
+
+    compatibility = SBoMCompatibility()
+    report = compatibility.compatibility_report(normalized_sbom,
+                                                UseCase.usecase_to_string(UseCase.LIBRARY),
+                                                Provisioning.provisioning_to_string(Provisioning.BIN_DIST),
+                                                Modification.modification_to_string(Modification.UNMODIFIED))
     logging.debug(f'Report: {report}')
 
     formatter = SBoMReportFormatterFactory.formatter(args.output_format)
