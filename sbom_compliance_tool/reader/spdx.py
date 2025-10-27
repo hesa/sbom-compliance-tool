@@ -1,8 +1,57 @@
-#!/bin/env python3
+# SPDX-FileCopyrightText: 2025 Henrik Sandklef
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+#
+# information mainly picked up here: https://spdx.github.io/spdx-spec/v2.3/
+#
+
+import logging
+
+from sbom_compliance_tool.reader.sbom_reader import SBoMReader
+
+from licomp.interface import UseCase
 
 from spdx_tools.spdx.parser.parse_anything import parse_file
 
-class SPDXCompliance:
+class SPDXSBoMReader(SBoMReader):
+
+    def __init__(self):
+        self.relationship_map = {
+            'library': UseCase.usecase_to_string(UseCase.LIBRARY),
+            'snippet': UseCase.usecase_to_string(UseCase.SNIPPET),
+        }
+        
+    def normalize_sbom_file(self, file_path):
+        logging.info(f'Reading {file_path} as SPDX')
+        parsed = ParsedSPDXDoc(file_path)
+        logging.info(f'Reading {file_path} as SPDX: parse OK')
+
+        packages = []
+        for package in parsed.packages():
+            print(" * " + str(package))
+            relations, relations_inv = parsed.relations(package)
+            for relation in relations:
+                print("     ---> " + str(relation))
+            for relation in relations_inv:
+                print("     <--- " + str(relation))
+        
+        self._normalized_sbom = component
+        return self._normalized_sbom
+
+    def normalize_sbom_data(self, data):
+        return None
+
+    def normalized_sbom(self):
+        return None
+
+    def supported_sbom(self):
+        return None
+
+    def summarize_licenses(self, licenses):
+        return f' {SBoMComplianceTags.LICENSE_OP_AND.value} '.join(licenses)
+
+class ParsedSPDXDoc:
 
     def __init__(self, file_path):
         self.rel_map = {}
@@ -12,6 +61,7 @@ class SPDXCompliance:
             'files': {},
         }
         self._read_spdx_sbom(file_path)
+
 
     def _read_spdx_sbom(self, file_path):
         self.doc = parse_file(file_path)
@@ -65,21 +115,28 @@ class SPDXCompliance:
             self.objects['packages'][pkg.spdx_id] = pkg
 
         for fil in self.doc.files:
-            #print("add " + str(fil
             self.objects['files'][fil.spdx_id] = fil
 
-# temp main
-spdx = SPDXCompliance('../../spdx/spdx-examples/software/example9/spdx2.2/appbomination.spdx.json')
+    def normalized_sbom(self):
+        return self._normalized_sbom
 
-for p in spdx.packages() + spdx.files():
-    print(str(p) + " " + str(spdx.object_name(p)))
-    
-    rels, inv_rels = spdx.relations(p)
-    for spdx1, rel, spdx2 in rels:
-        print("       --> " + str(spdx.object_name(spdx2)))
+    def supported_bom(self):
+        return "SPDX"
 
-    for spdx1, rel, spdx2 in inv_rels:
-        print("       <-- " + str(spdx.object_name(spdx1)))
+
+if False:
+    # temp main
+    spdx = ParsedSPDXDoc('../../spdx/spdx-examples/software/example9/spdx2.2/appbomination.spdx.json')
+
+    for p in spdx.packages() + spdx.files():
+        print(str(p) + " " + str(spdx.object_name(p)))
+
+        rels, inv_rels = spdx.relations(p)
+        for spdx1, rel, spdx2 in rels:
+            print("       --> " + str(spdx.object_name(spdx2)))
+
+        for spdx1, rel, spdx2 in inv_rels:
+            print("       <-- " + str(spdx.object_name(spdx1)))
         
         
         

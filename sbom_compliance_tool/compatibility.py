@@ -26,12 +26,11 @@ class SBoMCompatibility():
             return new
         return current
 
-    def compatibility_report(self, sbom, usecase, provisioning, modified):
-        sbom_content = sbom['sbom']
-        outbound = sbom_content["license"]
+    def _package_compatibility_report(self, package, usecase, provisioning, modified):
+        outbound = package["license"]
         report = {
-            'name': sbom_content["name"],
-            'version': sbom_content["version"],
+            'name': package["name"],
+            'version': package["version"],
             'license': outbound,
         }
 
@@ -39,7 +38,7 @@ class SBoMCompatibility():
         compat_checker = ExpressionExpressionChecker()
         deps = []
         top_compat = None
-        for dep in sbom_content['dependencies']:
+        for dep in package['dependencies']:
             inbound = dep['license']
             usecase = dep.get('usecase', usecase)
             if inbound:
@@ -64,3 +63,17 @@ class SBoMCompatibility():
         report['dependencies'] = deps
 
         return report
+
+    def compatibility_report(self, sbom, usecase, provisioning, modified):
+        sbom_content = sbom['sbom']
+        sbom_packages = sbom_content['packages']
+        #print("sbp: " + str(sbom_packages))
+
+        packages_report = []
+        for s_pkg in sbom_packages:
+            package_report = self._package_compatibility_report(s_pkg, usecase, provisioning, modified)
+            packages_report.append(package_report)
+        
+        return {
+            'packages': packages_report
+        }

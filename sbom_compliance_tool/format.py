@@ -27,26 +27,35 @@ class SBoMReportFormatterJson(SBoMReportFormatter):
 
 class SBoMReportFormatterMarkdown(SBoMReportFormatter):
 
+    def _format_package(self, package):
+        lines = []
+        lines.append(f'## {package["name"]}')
+        lines.append(f'')
+        lines.append('### Summary')
+        lines.append(f'* name: {package["name"]}')
+        lines.append(f'* version: {package["version"]}')
+        lines.append(f'* otbound license: {package["license"]}')
+        lines.append(f'* compatibility: {package["compatibility"]}')
+        lines.append('')
+        lines.append('### Details')
+        lines.append('')
+        lines.append('#### Dependencies ')
+        for dep in package['dependencies']:
+            lines.append('')
+            lines.append(f'##### {dep["name"]}')
+            lines.append('')
+            lines.append(f'* version: {dep["version"]}')
+            lines.append(f'* license: {dep["license"]}')
+            lines.append(f'* compatibility: {dep["compatibility"]}')
+        return "\n".join(lines)
+    
     def format(self, report):
         lines = []
 
         lines.append('# Compliance report')
         lines.append('')
-        lines.append('## Summary')
-        lines.append(f'* name: {report["name"]}')
-        lines.append(f'* version: {report["version"]}')
-        lines.append(f'* otbound license: {report["license"]}')
-        lines.append(f'* compatibility: {report["compatibility"]}')
-        lines.append('')
-        lines.append('## Details')
-        lines.append('')
-        lines.append('### Dependencies ')
-        for dep in report['dependencies']:
-            lines.append('')
-            lines.append(f'#### {dep["name"]}')
-            lines.append('')
-            lines.append(f'* version: {dep["version"]}')
-            lines.append(f'* license: {dep["license"]}')
-            lines.append(f'* compatibility: {dep["compatibility"]}')
+        for package in report['packages']:
+            package_report = self._format_package(package)
+            lines.append(package_report)
 
         return "\n".join(lines)
