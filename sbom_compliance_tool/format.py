@@ -30,7 +30,7 @@ class SBoMReportFormatterMarkdown(SBoMReportFormatter):
     def _format_package(self, package):
         lines = []
         lines.append(f'## {package["name"]}')
-        lines.append(f'')
+        lines.append('')
         lines.append('### Summary')
         lines.append(f'* name: {package["name"]}')
         lines.append(f'* version: {package["version"]}')
@@ -47,12 +47,14 @@ class SBoMReportFormatterMarkdown(SBoMReportFormatter):
             lines.append(f'* version: {dep["version"]}')
             lines.append(f'* license: {dep["license"]}')
             lines.append(f'* compatibility: {dep["compatibility"]}')
+        lines.append(f'')
         return "\n".join(lines)
     
     def format(self, report):
         lines = []
 
         lines.append('# Compliance report')
+        lines.append('')
         lines.append('')
         for package in report['packages']:
             package_report = self._format_package(package)
