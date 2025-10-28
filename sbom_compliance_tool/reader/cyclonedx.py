@@ -15,12 +15,13 @@ from cyclonedx.model.bom import Bom
 class CyclonedxSBoMReader(SBoMReader):
 
     def __init__(self):
+        self._normalized_sbom = None
         self.classification_map = {
             'library': UseCase.usecase_to_string(UseCase.LIBRARY),
         }
 
     def _classification_to_usecase(self, classification):
-        return self.classification_map.get(classification, 'unknown')
+        return self.classification_map.get(classification, 'library')
 
     def normalize_sbom_file(self, file_path):
 
@@ -81,7 +82,9 @@ class CyclonedxSBoMReader(SBoMReader):
         return self._normalized_sbom
 
     def normalized_sbom(self):
+        if not self._normalized_sbom:
+            raise Exception(f'Failed reading SBoM data, not in CycloneDX format')
         return self._normalized_sbom
 
-    def supported_bom(self):
+    def supported_sbom(self):
         return "CycloneDX"
