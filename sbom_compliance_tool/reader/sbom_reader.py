@@ -34,6 +34,7 @@ class SBoMReader:
         return None
 
     def summarize_licenses(self, licenses):
+        #print("SUM LIC " + str(licenses))
         return f' {SBoMComplianceTags.LICENSE_OP_AND.value} '.join(licenses)
 
     def _read_xml(self, file_path):
@@ -59,7 +60,7 @@ class SBoMReader:
         return {
             'format': 'sbom-compliance-tool',
             'format_version': '0.1',
-            'original_format': self.supported_bom(),
+            'original_format': self.supported_sbom(),
         }
 
     def _component(self, name, version, licenses, dependencies):
