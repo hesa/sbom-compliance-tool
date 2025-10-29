@@ -21,17 +21,19 @@ def main():
 
     args = get_args()
 
+    if args.verbose:
+        logging.basicConfig(level=logging.INFO)
     if args.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-    logging.debug("SBoM Compliance Tool")
+        logging.basicConfig(level=logging.DEBUG)
+    logging.info("SBoM Compliance Tool")
 
     compliance = SBoMComplianceTool()
-    logging.debug(f'Tool: {compliance}')
+    logging.info(f'Tool: {compliance}')
 
-    compliance.from_sbom_file(args.sbom_file)
+    logging.info(f'Reading: {args.sbom_file}')
+    normalized_sbom = compliance.from_sbom_file(args.sbom_file)
 
-    normalized_sbom = compliance.normalized_sbom()
-
+    logging.info(f'Check compatibility: {args.sbom_file}')
     compatibility = SBoMCompatibility()
     report = compatibility.compatibility_report(normalized_sbom,
                                                 UseCase.usecase_to_string(UseCase.LIBRARY),

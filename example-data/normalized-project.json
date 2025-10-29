@@ -1,23 +1,32 @@
 {
   "meta": {
-    
+    "format": "sbom-compliance-tool",
+    "format_version": "0.1",
+    "original_format": "SPDX"
   },
   "sbom": {
-    "name": "Example Project",
-    "version": "0.1.1",
-    "license": "GPL-3.0-or-later OR BSD-3-Clause",
-    "dependencies": [
+    "packages": [
       {
-        "name": "Example Sub Project AAA",
-        "version": "0.3.4",
-        "license": "Apache-2.0",
-        "usecase": "library"
-      },
-      {
-        "name": "Example Sub Project BBB",
-        "version": "0.7.8",
-        "license": "BSD-3-Clause OR MIT",
-        "usecase": "library"
+        "name": "Example Project",
+        "version": "0.1.1",
+        "license": "GPL-3.0-or-later OR BSD-3-Clause",
+        "provisioning": "binary-distribution",
+        "dependencies": [
+          {
+            "name": "Example Sub Project AAA",
+            "version": "0.3.4",
+            "license": "Apache-2.0",
+            "usecase": "library",
+            "modified": "no"
+          },
+          {
+            "name": "Example Sub Project BBB",
+            "version": "0.7.8",
+            "license": "BSD-3-Clause OR MIT",
+            "usecase": "library",
+            "modified": "no"
+          }
+        ]
       }
     ]
   }
