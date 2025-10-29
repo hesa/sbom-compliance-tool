@@ -43,16 +43,14 @@ class CyclonedxSBoMReader(SBoMReader):
         elif lic.name:
             return lic.name
 
-
     def _component_license(self, component):
         try:
             licenses = [self._license(lic) for lic in component.licenses]
             return licenses
         except Exception as e:
-            logging.debug(f'Failed readinf "licenses" from "{component}"')
+            logging.debug(f'Failed readinf "licenses" from "{component}". Exception: {e}')
         return []
-        
-        
+
     def normalize_sbom_data(self, data, sbom_format='json'):
         if sbom_format == 'json':
             deserialized_bom = Bom.from_json(data=data)
@@ -73,17 +71,17 @@ class CyclonedxSBoMReader(SBoMReader):
                                                licenses,
                                                components)
         except Exception as e:
+            logging.debug(f'COuld not pack component. Exceptiion: {e}')
             return None
 
         top_components = self._pack_components([packed_component])
-        
+
         self._normalized_sbom = top_components
-#        print(str(self._normalized_sbom))
         return self._normalized_sbom
 
     def normalized_sbom(self):
         if not self._normalized_sbom:
-            raise Exception(f'Failed reading SBoM data, not in CycloneDX format')
+            raise Exception('Failed reading SBoM data, not in CycloneDX format')
         return self._normalized_sbom
 
     def supported_sbom(self):

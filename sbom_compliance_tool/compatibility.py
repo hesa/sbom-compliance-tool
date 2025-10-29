@@ -67,13 +67,12 @@ class SBoMCompatibility():
     def compatibility_report(self, sbom, usecase, provisioning, modified):
         sbom_content = sbom['sbom']
         sbom_packages = sbom_content['packages']
-        #print("sbp: " + str(sbom_packages))
 
         packages_report = []
         for s_pkg in sbom_packages:
             package_report = self._package_compatibility_report(s_pkg, usecase, provisioning, modified)
             packages_report.append(package_report)
-        
+
         return {
-            'packages': packages_report
+            'packages': packages_report,
         }

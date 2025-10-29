@@ -32,7 +32,6 @@ def main():
 
     logging.info(f'Reading: {args.sbom_file}')
     normalized_sbom = compliance.from_sbom_file(args.sbom_file)
-    #print("SCT: " + str(normalized_sbom))
 
     logging.info(f'Check compatibility: {args.sbom_file}')
     compatibility = SBoMCompatibility()

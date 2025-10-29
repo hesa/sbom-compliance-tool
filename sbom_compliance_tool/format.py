@@ -47,9 +47,9 @@ class SBoMReportFormatterMarkdown(SBoMReportFormatter):
             lines.append(f'* version: {dep["version"]}')
             lines.append(f'* license: {dep["license"]}')
             lines.append(f'* compatibility: {dep["compatibility"]}')
-        lines.append(f'')
+        lines.append('')
         return "\n".join(lines)
-    
+
     def format(self, report):
         lines = []
 

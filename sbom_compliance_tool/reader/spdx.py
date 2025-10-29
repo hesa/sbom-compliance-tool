@@ -36,9 +36,8 @@ class SPDXSBoMReader(SBoMReader):
                                   p_usecase,
                                   [str(p_license)])
 
-#        print(str(ret))
         return ret
-        
+
     def _normalize_package(self, parsed_doc, package):
         print(f' * {package} "{parsed_doc.object_name(package)}"')
         relations, relations_inv = parsed_doc.relations(package)
@@ -47,15 +46,14 @@ class SPDXSBoMReader(SBoMReader):
             packages.append(self._normalize_sub_package(parsed_doc, spdx1, rel, spdx2))
         for spdx1, rel, spdx2 in relations_inv:
             packages.append(self._normalize_sub_package(parsed_doc, spdx1, rel, spdx2, inverted=True))
-            #print("     <--- " + str(relation))
 
         packed_component = self._component(parsed_doc.object_name(package),
                                            parsed_doc.object_version(package),
                                            [],
                                            packages)
-        
+
         return packed_component
-    
+
     def normalize_sbom_file(self, file_path):
         logging.info(f'Reading {file_path} as SPDX')
         parsed = ParsedSPDXDoc(file_path)
@@ -64,11 +62,9 @@ class SPDXSBoMReader(SBoMReader):
         packages = []
         for package in parsed.packages():
             packages.append(self._normalize_package(parsed, package))
-        print("done")
 
         top_components = self._pack_components(packages)
         self._normalized_sbom = top_components
-        #print("THIS: " + str(top_components))
         return self._normalized_sbom
 
     def normalize_sbom_data(self, data):
@@ -91,12 +87,11 @@ class ParsedSPDXDoc:
         }
         self._read_spdx_sbom(file_path)
 
-
     def _read_spdx_sbom(self, file_path):
         self.doc = parse_file(file_path)
         self._update_relationships()
         self._update_objects()
-            
+
     def object_name(self, spdxid):
         obj = self.object(spdxid)
         if not obj:
@@ -110,7 +105,7 @@ class ParsedSPDXDoc:
                 return "missing"
             return obj.version
         except Exception as e:
-            logging.debug(f'Failed getting version for {spdxid}')
+            logging.debug(f'Failed getting version for {spdxid}. Exception: {e}')
 
         return ''
 
@@ -122,12 +117,12 @@ class ParsedSPDXDoc:
         try:
             return obj.license_concluded
         except Exception as e:
-            logging.debug(f'Failed getting license_concluded for {spdxid}')
+            logging.debug(f'Failed getting license_concluded for {spdxid}. Exception: {e}')
 
         try:
             return obj.license_declared
         except Exception as e:
-            logging.debug(f'Failed getting license_declared for {spdxid}')
+            logging.debug(f'Failed getting license_declared for {spdxid}. Exception: {e}')
 
         logging.debug(f'Failed getting license for {spdxid}, returning empty string')
         return ''
@@ -145,9 +140,8 @@ class ParsedSPDXDoc:
         return None
 
     def relations(self, spdxid):
-        return (self.rel_map.get(spdxid, []), 
+        return (self.rel_map.get(spdxid, []),
                 self.rel_map_inv.get(spdxid, []))
-
 
     def spdx_file(self, spdxid):
         return self.objects['files'][spdxid]
@@ -172,6 +166,7 @@ class ParsedSPDXDoc:
             self._update_rel_maps(rel.spdx_element_id,
                                   rel.relationship_type.name,
                                   rel.related_spdx_element_id)
+
     def _update_objects(self):
         for pkg in self.doc.packages:
             self.objects['packages'][pkg.spdx_id] = pkg
@@ -184,21 +179,3 @@ class ParsedSPDXDoc:
 
     def supported_bom(self):
         return "SPDX"
-
-
-if False:
-    # temp main
-    spdx = ParsedSPDXDoc('../../spdx/spdx-examples/software/example9/spdx2.2/appbomination.spdx.json')
-
-    for p in spdx.packages() + spdx.files():
-        print(str(p) + " " + str(spdx.object_name(p)))
-
-        rels, inv_rels = spdx.relations(p)
-        for spdx1, rel, spdx2 in rels:
-            print("       --> " + str(spdx.object_name(spdx2)))
-
-        for spdx1, rel, spdx2 in inv_rels:
-            print("       <-- " + str(spdx.object_name(spdx1)))
-        
-        
-        
