@@ -18,19 +18,63 @@ class SPDXSBoMReader(SBoMReader):
 
     def __init__(self):
         self.relationship_map = {
-            '': UseCase.usecase_to_string(UseCase.LIBRARY),
+            AMENDS: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            ANCESTOR_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            BUILD_DEPENDENCY_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            BUILD_TOOL_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            CONTAINED_BY: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            CONTAINS: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            COPY_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DATA_FILE_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DEPENDENCY_MANIFEST_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DEPENDENCY_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DEPENDS_ON: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DESCENDANT_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DESCRIBED_BY: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DESCRIBES: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DEV_DEPENDENCY_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DEV_TOOL_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DISTRIBUTION_ARTIFACT: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DOCUMENTATION_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            DYNAMIC_LINK: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            EXAMPLE_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            EXPANDED_FROM_ARCHIVE: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            FILE_ADDED: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            FILE_DELETED: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            FILE_MODIFIED: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            GENERATED_FROM: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            GENERATES: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            HAS_PREREQUISITE: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            METAFILE_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            OPTIONAL_COMPONENT_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            OPTIONAL_DEPENDENCY_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            OTHER: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            PACKAGE_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            PATCH_APPLIED: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            PATCH_FOR: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            PREREQUISITE_FOR: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            PROVIDED_DEPENDENCY_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            REQUIREMENT_DESCRIPTION_FOR: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            RUNTIME_DEPENDENCY_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            SPECIFICATION_FOR: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            STATIC_LINK: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            TEST_CASE_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            TEST_DEPENDENCY_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            TEST_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            TEST_TOOL_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
+            VARIANT_OF: UseCase.usecase_to_string(UseCase.LIBRARY__),
             'snippet': UseCase.usecase_to_string(UseCase.SNIPPET),
         }
 
     def _relationship_to_usecase(self, classification):
-        return self.relationship_map.get(classification, 'library')
+        return self.relationship_map.get(classification, 'unknown')
 
     def _normalize_sub_package(self, parsed_doc, spdx1, rel, spdx2, inverted=False):
-        print("    |---> " + str(spdx2))
         p_name = parsed_doc.object_name(spdx2)
         p_version = parsed_doc.object_version(spdx2)
         p_license = parsed_doc.object_license(spdx2)
         p_usecase = self._relationship_to_usecase(rel)
+        print("    rel " + str(rel))
         ret = self._sub_component(p_name,
                                   p_version,
                                   p_usecase,
