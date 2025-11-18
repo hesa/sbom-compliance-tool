@@ -63,8 +63,9 @@ class SPDXSBoMReader(SBoMReader):
             RelationshipType.TEST_DEPENDENCY_OF: UseCase.UNKNOWN,
             RelationshipType.TEST_OF: UseCase.UNKNOWN,
             RelationshipType.TEST_TOOL_OF: UseCase.UNKNOWN,
-            RelationshipType.VARIANT_OF: UseCase.UNKNOWN
+            RelationshipType.VARIANT_OF: UseCase.UNKNOWN,
         }
+
         self.relationship_map = {
             'AMENDS': UseCase.UNKNOWN,
             'ANCESTOR_OF': UseCase.UNKNOWN,
@@ -110,14 +111,13 @@ class SPDXSBoMReader(SBoMReader):
             'TEST_DEPENDENCY_OF': UseCase.UNKNOWN,
             'TEST_OF': UseCase.UNKNOWN,
             'TEST_TOOL_OF': UseCase.UNKNOWN,
-            'VARIANT_OF': UseCase.UNKNOWN
+            'VARIANT_OF': UseCase.UNKNOWN,
         }
 
     def _relationship_to_usecase(self, relationship):
         logging.debug(f'Finding usecase for {relationship}')
         # crash if relationship is missing
         usecase = self.relationship_map[relationship]
-        #print("UC : " + str(usecase))
         return UseCase.usecase_to_string(usecase)
 
     def _normalize_sub_package(self, parsed_doc, spdx1, rel, spdx2, inverted=False):
@@ -133,11 +133,9 @@ class SPDXSBoMReader(SBoMReader):
         return ret
 
     def _normalize_package(self, parsed_doc, package):
-        #print(f' * {package} "{parsed_doc.object_name(package)}"')
         relations, relations_inv = parsed_doc.relations(package)
         packages = []
         for spdx1, rel, spdx2 in relations:
-            #print("rel: " + rel)
             packages.append(self._normalize_sub_package(parsed_doc, spdx1, rel, spdx2))
         for spdx1, rel, spdx2 in relations_inv:
             packages.append(self._normalize_sub_package(parsed_doc, spdx1, rel, spdx2, inverted=True))

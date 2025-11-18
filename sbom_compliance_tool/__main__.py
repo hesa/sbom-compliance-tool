@@ -30,14 +30,13 @@ def main():
     compliance = SBoMComplianceTool()
     logging.info(f'Tool: {compliance}')
 
-    
     logging.info(f'Reading: {args.sbom_file}')
     normalized_sbom = compliance.from_sbom_file(args.sbom_file)
 
     if not normalized_sbom:
         logging.info(f'Failed normalizing: {args.sbom_file}')
         sys.exit(1)
-        
+
     logging.info(f'Check compatibility: {args.sbom_file}')
     compatibility = SBoMCompatibility()
     report = compatibility.compatibility_report(normalized_sbom,

@@ -41,10 +41,10 @@ class SBoMReportFormatterMarkdown(SBoMReportFormatter):
         for dep in package['dependencies']:
             comp = dep["compatibility"]
             comps[comp] = comps.get(comp, 0) + 1
-        lines.append(f'* compatibility details:')
+        lines.append('* compatibility details:')
         for comp in comps:
             lines.append(f'    * {comp}:{comps[comp]}')
-            
+
         lines.append('')
         lines.append('### Details')
         lines.append('')
@@ -57,12 +57,11 @@ class SBoMReportFormatterMarkdown(SBoMReportFormatter):
             lines.append(f'* license: {dep["license"]}')
             lines.append(f'* compatibility: {dep["compatibility"]}')
             if dep["license"] and dep["license"] != '':
-                # at some point, move the stuff that belongs to the top level 
+                # at some point, move the stuff that belongs to the top level
                 lines.append(f'* usecase: {dep["compatibility_details"]["usecase"]}')
                 lines.append(f'* provisioning: {dep["compatibility_details"]["provisioning"]}')
                 lines.append('* modified: ')
-#                lines.append(f'* modified: NOT SUPPORTED AT THE MOMENT')
-        
+
         lines.append('')
         return "\n".join(lines)
 
