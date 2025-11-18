@@ -2,7 +2,9 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# information mainly picked up here: https://cyclonedx.org/guides/OWASP_CycloneDX-Authoritative-Guide-to-SBOM-en.pdf
+# information mainly picked up here:
+# * https://cyclonedx.org/guides/OWASP_CycloneDX-Authoritative-Guide-to-SBOM-en.pdf
+# * https://cyclonedx.org/docs/1.7/xml/#type_classification
 
 import logging
 
@@ -11,17 +13,31 @@ from sbom_compliance_tool.reader.sbom_reader import SBoMReader
 from licomp.interface import UseCase
 
 from cyclonedx.model.bom import Bom
+from cyclonedx.model.component import ComponentType
 
 class CyclonedxSBoMReader(SBoMReader):
 
     def __init__(self):
         self._normalized_sbom = None
         self.classification_map = {
-            'library': UseCase.usecase_to_string(UseCase.LIBRARY),
+            ComponentType.APPLICATION.value: UseCase.TOOL,
+            ComponentType.CONTAINER.value: UseCase.UNKNOWN,
+            ComponentType.CRYPTOGRAPHIC_ASSET.value: UseCase.UNKNOWN,
+            ComponentType.DATA.value: UseCase.UNKNOWN,
+            ComponentType.DEVICE.value: UseCase.UNKNOWN,
+            ComponentType.DEVICE_DRIVER.value: UseCase.UNKNOWN,
+            ComponentType.FILE.value: UseCase.SNIPPET,
+            ComponentType.FIRMWARE.value: UseCase.UNKNOWN,
+            ComponentType.FRAMEWORK.value: UseCase.UNKNOWN,
+            ComponentType.LIBRARY.value: UseCase.LIBRARY,
+            ComponentType.MACHINE_LEARNING_MODEL.value: UseCase.UNKNOWN,
+            ComponentType.OPERATING_SYSTEM.value: UseCase.UNKNOWN,
+            ComponentType.PLATFORM.value: UseCase.UNKNOWN,
         }
 
     def _classification_to_usecase(self, classification):
-        return self.classification_map.get(classification, 'library')
+        # crash if classification is missing
+        return UseCase.usecase_to_string(self.classification_map[classification])
 
     def normalize_sbom_file(self, file_path):
 
