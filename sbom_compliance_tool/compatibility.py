@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import logging
+
 from licomp_toolkit.toolkit import ExpressionExpressionChecker
 from flame.license_db import FossLicenses
 
@@ -26,6 +28,13 @@ class SBoMCompatibility():
             return new
         return current
 
+    def _identify_license(self, lic):
+        try:
+            return self.flame.expression_license(lic, update_dual=False)['identified_license']
+        except Exception:
+            logging.debug('Could not identify license using flame, returning input.')
+            return lic
+
     def _package_compatibility_report(self, package, usecase, provisioning, modified):
         outbound = package["license"]
         report = {
@@ -42,8 +51,8 @@ class SBoMCompatibility():
             inbound = dep['license']
             usecase = dep.get('usecase', usecase)
             if inbound:
-                dep_compat = compat_checker.check_compatibility(self.flame.expression_license(outbound, update_dual=False)['identified_license'],
-                                                                self.flame.expression_license(inbound, update_dual=False)['identified_license'],
+                dep_compat = compat_checker.check_compatibility(self._identify_license(outbound),
+                                                                self._identify_license(inbound),
                                                                 usecase,
                                                                 provisioning,
                                                                 resources)

@@ -13,20 +13,114 @@ from sbom_compliance_tool.reader.sbom_reader import SBoMReader
 from licomp.interface import UseCase
 
 from spdx_tools.spdx.parser.parse_anything import parse_file
+from spdx_tools.spdx.model.relationship import RelationshipType
 
 class SPDXSBoMReader(SBoMReader):
 
     def __init__(self):
-        self.relationship_map = {
-            '': UseCase.usecase_to_string(UseCase.LIBRARY),
-            'snippet': UseCase.usecase_to_string(UseCase.SNIPPET),
+        self.relationship_map_raw = {
+            RelationshipType.AMENDS: UseCase.UNKNOWN,
+            RelationshipType.ANCESTOR_OF: UseCase.UNKNOWN,
+            RelationshipType.BUILD_DEPENDENCY_OF: UseCase.UNKNOWN,
+            RelationshipType.BUILD_TOOL_OF: UseCase.UNKNOWN,
+            RelationshipType.CONTAINED_BY: UseCase.UNKNOWN,
+            RelationshipType.CONTAINS: UseCase.UNKNOWN,
+            RelationshipType.COPY_OF: UseCase.UNKNOWN,
+            RelationshipType.DATA_FILE_OF: UseCase.UNKNOWN,
+            RelationshipType.DEPENDENCY_MANIFEST_OF: UseCase.UNKNOWN,
+            RelationshipType.DEPENDENCY_OF: UseCase.LIBRARY,
+            RelationshipType.DEPENDS_ON: UseCase.LIBRARY,
+            RelationshipType.DESCENDANT_OF: UseCase.UNKNOWN,
+            RelationshipType.DESCRIBED_BY: UseCase.UNKNOWN,
+            RelationshipType.DESCRIBES: UseCase.UNKNOWN,
+            RelationshipType.DEV_DEPENDENCY_OF: UseCase.UNKNOWN,
+            RelationshipType.DEV_TOOL_OF: UseCase.UNKNOWN,
+            RelationshipType.DISTRIBUTION_ARTIFACT: UseCase.UNKNOWN,
+            RelationshipType.DOCUMENTATION_OF: UseCase.UNKNOWN,
+            RelationshipType.DYNAMIC_LINK: UseCase.LIBRARY,
+            RelationshipType.EXAMPLE_OF: UseCase.UNKNOWN,
+            RelationshipType.EXPANDED_FROM_ARCHIVE: UseCase.UNKNOWN,
+            RelationshipType.FILE_ADDED: UseCase.UNKNOWN,
+            RelationshipType.FILE_DELETED: UseCase.UNKNOWN,
+            RelationshipType.FILE_MODIFIED: UseCase.UNKNOWN,
+            RelationshipType.GENERATED_FROM: UseCase.UNKNOWN,
+            RelationshipType.GENERATES: UseCase.UNKNOWN,
+            RelationshipType.HAS_PREREQUISITE: UseCase.LIBRARY,
+            RelationshipType.METAFILE_OF: UseCase.UNKNOWN,
+            RelationshipType.OPTIONAL_COMPONENT_OF: UseCase.UNKNOWN,
+            RelationshipType.OPTIONAL_DEPENDENCY_OF: UseCase.LIBRARY,
+            RelationshipType.OTHER: UseCase.UNKNOWN,
+            RelationshipType.PACKAGE_OF: UseCase.UNKNOWN,
+            RelationshipType.PATCH_APPLIED: UseCase.UNKNOWN,
+            RelationshipType.PATCH_FOR: UseCase.UNKNOWN,
+            RelationshipType.PREREQUISITE_FOR: UseCase.UNKNOWN,
+            RelationshipType.PROVIDED_DEPENDENCY_OF: UseCase.LIBRARY,
+            RelationshipType.REQUIREMENT_DESCRIPTION_FOR: UseCase.UNKNOWN,
+            RelationshipType.RUNTIME_DEPENDENCY_OF: UseCase.LIBRARY,
+            RelationshipType.SPECIFICATION_FOR: UseCase.UNKNOWN,
+            RelationshipType.STATIC_LINK: UseCase.LIBRARY,
+            RelationshipType.TEST_CASE_OF: UseCase.UNKNOWN,
+            RelationshipType.TEST_DEPENDENCY_OF: UseCase.UNKNOWN,
+            RelationshipType.TEST_OF: UseCase.UNKNOWN,
+            RelationshipType.TEST_TOOL_OF: UseCase.UNKNOWN,
+            RelationshipType.VARIANT_OF: UseCase.UNKNOWN,
         }
 
-    def _relationship_to_usecase(self, classification):
-        return self.relationship_map.get(classification, 'library')
+        self.relationship_map = {
+            'AMENDS': UseCase.UNKNOWN,
+            'ANCESTOR_OF': UseCase.UNKNOWN,
+            'BUILD_DEPENDENCY_OF': UseCase.UNKNOWN,
+            'BUILD_TOOL_OF': UseCase.UNKNOWN,
+            'CONTAINED_BY': UseCase.UNKNOWN,
+            'CONTAINS': UseCase.UNKNOWN,
+            'COPY_OF': UseCase.UNKNOWN,
+            'DATA_FILE_OF': UseCase.UNKNOWN,
+            'DEPENDENCY_MANIFEST_OF': UseCase.UNKNOWN,
+            'DEPENDENCY_OF': UseCase.LIBRARY,
+            'DEPENDS_ON': UseCase.LIBRARY,
+            'DESCENDANT_OF': UseCase.UNKNOWN,
+            'DESCRIBED_BY': UseCase.UNKNOWN,
+            'DESCRIBES': UseCase.UNKNOWN,
+            'DEV_DEPENDENCY_OF': UseCase.UNKNOWN,
+            'DEV_TOOL_OF': UseCase.UNKNOWN,
+            'DISTRIBUTION_ARTIFACT': UseCase.UNKNOWN,
+            'DOCUMENTATION_OF': UseCase.UNKNOWN,
+            'DYNAMIC_LINK': UseCase.LIBRARY,
+            'EXAMPLE_OF': UseCase.UNKNOWN,
+            'EXPANDED_FROM_ARCHIVE': UseCase.UNKNOWN,
+            'FILE_ADDED': UseCase.UNKNOWN,
+            'FILE_DELETED': UseCase.UNKNOWN,
+            'FILE_MODIFIED': UseCase.UNKNOWN,
+            'GENERATED_FROM': UseCase.UNKNOWN,
+            'GENERATES': UseCase.UNKNOWN,
+            'HAS_PREREQUISITE': UseCase.LIBRARY,
+            'METAFILE_OF': UseCase.UNKNOWN,
+            'OPTIONAL_COMPONENT_OF': UseCase.UNKNOWN,
+            'OPTIONAL_DEPENDENCY_OF': UseCase.LIBRARY,
+            'OTHER': UseCase.UNKNOWN,
+            'PACKAGE_OF': UseCase.UNKNOWN,
+            'PATCH_APPLIED': UseCase.UNKNOWN,
+            'PATCH_FOR': UseCase.UNKNOWN,
+            'PREREQUISITE_FOR': UseCase.UNKNOWN,
+            'PROVIDED_DEPENDENCY_OF': UseCase.LIBRARY,
+            'REQUIREMENT_DESCRIPTION_FOR': UseCase.UNKNOWN,
+            'RUNTIME_DEPENDENCY_OF': UseCase.LIBRARY,
+            'SPECIFICATION_FOR': UseCase.UNKNOWN,
+            'STATIC_LINK': UseCase.LIBRARY,
+            'TEST_CASE_OF': UseCase.UNKNOWN,
+            'TEST_DEPENDENCY_OF': UseCase.UNKNOWN,
+            'TEST_OF': UseCase.UNKNOWN,
+            'TEST_TOOL_OF': UseCase.UNKNOWN,
+            'VARIANT_OF': UseCase.UNKNOWN,
+        }
+
+    def _relationship_to_usecase(self, relationship):
+        logging.debug(f'Finding usecase for {relationship}')
+        # crash if relationship is missing
+        usecase = self.relationship_map[relationship]
+        return UseCase.usecase_to_string(usecase)
 
     def _normalize_sub_package(self, parsed_doc, spdx1, rel, spdx2, inverted=False):
-        print("    |---> " + str(spdx2))
         p_name = parsed_doc.object_name(spdx2)
         p_version = parsed_doc.object_version(spdx2)
         p_license = parsed_doc.object_license(spdx2)
@@ -39,7 +133,6 @@ class SPDXSBoMReader(SBoMReader):
         return ret
 
     def _normalize_package(self, parsed_doc, package):
-        print(f' * {package} "{parsed_doc.object_name(package)}"')
         relations, relations_inv = parsed_doc.relations(package)
         packages = []
         for spdx1, rel, spdx2 in relations:
@@ -173,6 +266,9 @@ class ParsedSPDXDoc:
 
         for fil in self.doc.files:
             self.objects['files'][fil.spdx_id] = fil
+
+        for snippet in self.doc.snippets:
+            self.objects['snippets'][snippet.spdx_id] = snippet
 
     def normalized_sbom(self):
         return self._normalized_sbom
