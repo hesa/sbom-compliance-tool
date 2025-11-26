@@ -16,6 +16,8 @@ from licomp.interface import UseCase
 from licomp.interface import Provisioning
 from licomp.interface import Modification
 
+from sbom_compliance_tool.config import description
+
 
 def main():
 
@@ -52,7 +54,7 @@ def main():
 
 def get_parser():
     parser = argparse.ArgumentParser(prog="sbom-....",
-                                     description="",
+                                     description=description,
                                      epilog="",
                                      formatter_class=argparse.RawTextHelpFormatter)
 
