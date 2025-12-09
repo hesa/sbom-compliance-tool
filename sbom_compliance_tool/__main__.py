@@ -10,19 +10,27 @@ import sys
 
 from sbom_compliance_tool.compliance_tool import SBoMComplianceTool
 from sbom_compliance_tool.format import SBoMReportFormatterFactory
+from sbom_compliance_tool.format import FORMATS
+from sbom_compliance_tool.format import DEFAULT_FORMAT
 from sbom_compliance_tool.compatibility import SBoMCompatibility
 
 from licomp.interface import UseCase
 from licomp.interface import Provisioning
 from licomp.interface import Modification
 
-from sbom_compliance_tool.config import description
+from sbom_compliance_tool.config import long_description
+from sbom_compliance_tool.config import program_name
+from sbom_compliance_tool.config import sbom_compliance_tool_version
+from sbom_compliance_tool.config import epilog
 
 
 def main():
 
     args = get_args()
 
+    if args.version:
+        print(sbom_compliance_tool_version)
+        sys.exit(0)
     if args.verbose:
         logging.basicConfig(level=logging.INFO)
     if args.debug:
@@ -52,25 +60,38 @@ def main():
 
     print(formatted_report)
 
-def get_parser():
-    parser = argparse.ArgumentParser(prog="sbom-....",
-                                     description=description,
-                                     epilog="",
-                                     formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("sbom_file")
+def get_parser():
+    parser = argparse.ArgumentParser(prog=program_name,
+                                     description=long_description,
+                                     epilog=epilog,
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('-of', '--output-format',
                         type=str,
-                        default='json')
+                        help=f'The format for the resulting output. Avilable formats: {", ".join(FORMATS)}. Default: {DEFAULT_FORMAT}.',
+                        default=DEFAULT_FORMAT)
 
     parser.add_argument('-v', '--verbose',
                         action='store_true',
+                        help='Enable verbose output.',
+                        default=False)
+
+    parser.add_argument('-V', '--version',
+                        action='store_true',
+                        help='Output version number.',
                         default=False)
 
     parser.add_argument('-d', '--debug',
                         action='store_true',
+                        help='Output debug information.',
                         default=False)
+
+    subparsers = parser.add_subparsers(help='Sub commands')
+    parser_v = subparsers.add_parser('verify',
+                                     help='Verify license compatibility between the licenses for packages in an SBoM.')
+
+    parser_v.add_argument("sbom_file")
 
     return parser
 
