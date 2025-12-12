@@ -4,15 +4,20 @@
 
 import json
 
+FORMAT_JSON = 'json'
+FORMAT_MARKDOWN = 'markdown'
+FORMATS = [FORMAT_JSON, FORMAT_MARKDOWN]
+DEFAULT_FORMAT = FORMAT_JSON
+
 class SBoMReportFormatterFactory():
 
     @staticmethod
     def formatter(fmt):
-        if fmt.lower() == 'markdown':
+        if fmt.lower() == FORMAT_MARKDOWN:
             return SBoMReportFormatterMarkdown()
-        else:
+        elif fmt.lower() == FORMAT_JSON:
             return SBoMReportFormatterJson()
-
+        raise Exception(f'Format "{fmt}" not supported.')
 
 class SBoMReportFormatter():
 
