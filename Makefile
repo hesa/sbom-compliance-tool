@@ -24,3 +24,6 @@ lint:
 
 test:
 	echo no test at the moment
+
+py-lint:
+	reuse --suppress-deprecation lint
