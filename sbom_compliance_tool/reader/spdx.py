@@ -11,6 +11,7 @@ import logging
 from sbom_compliance_tool.reader.sbom_reader import SBoMReader
 
 from licomp.interface import UseCase
+from lookup_license.lookuplicense import LookupLicense
 
 from spdx_tools.spdx.parser.parse_anything import parse_file
 from spdx_tools.spdx.model.relationship import RelationshipType
@@ -177,7 +178,10 @@ class ParsedSPDXDoc:
         self.objects = {
             'packages': {},
             'files': {},
+            'extracted_text': {},
         }
+        self.ll = LookupLicense()
+
         self._read_spdx_sbom(file_path)
 
     def _read_spdx_sbom(self, file_path):
@@ -202,20 +206,34 @@ class ParsedSPDXDoc:
 
         return ''
 
+    def _lookup_extracted_text(self, license_id):
+        """lookup license, provided as extracted license text in the
+        SBoM, in the objects dict"""
+        try:
+            return self.objects['extracted_text'][license_id]
+        except Exception as e:
+            return None
+
     def object_license(self, spdxid):
         obj = self.object(spdxid)
+        
         if not obj:
             return "missing"
 
-        try:
+        if obj.license_concluded and str(obj.license_concluded) != 'NOASSERTION':
+            if str(obj.license_concluded).startswith('LicenseRef'):
+                lookedup = self._lookup_extracted_text(str(obj.license_concluded))
+                if lookedup:
+                    return lookedup
+                
             return obj.license_concluded
-        except Exception as e:
-            logging.debug(f'Failed getting license_concluded for {spdxid}. Exception: {e}')
 
-        try:
+        if obj.license_declared and str(obj.license_declared) != 'NOASSERTION':
+            if str(obj.license_declared).startswith('LicenseRef'):
+                lookedup = self._lookup_extracted_text(str(obj.license_declared))
+                if lookedup:
+                    return lookedup
             return obj.license_declared
-        except Exception as e:
-            logging.debug(f'Failed getting license_declared for {spdxid}. Exception: {e}')
 
         logging.debug(f'Failed getting license for {spdxid}, returning empty string')
         return ''
@@ -269,6 +287,23 @@ class ParsedSPDXDoc:
 
         for snippet in self.doc.snippets:
             self.objects['snippets'][snippet.spdx_id] = snippet
+
+        try:
+            for lic in self.doc.extracted_licensing_info:
+                lookedup = self.ll.lookup_license_text(lic.extracted_text)
+                identification = lookedup['identification']
+                if identification == 'flame':
+                    normalized_license = ' AND '.join(lookedup['normalized'])
+                else:
+                    normalized_license = ' AND '.join([x['license'] for x in lookedup['normalized']])
+                self.objects['extracted_text'][lic.license_id] = normalized_license
+                
+        except Exception as e:
+            #TODO: use logging, dont exit
+            print("e: " + str(e))
+            print("e: " + str(self.doc))
+            import sys
+            sys.exit(1)
 
     def normalized_sbom(self):
         return self._normalized_sbom
