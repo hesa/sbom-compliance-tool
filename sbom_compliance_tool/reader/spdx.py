@@ -160,7 +160,7 @@ class SPDXSBoMReader(SBoMReader):
         for package in parsed.packages():
             normalized_package = self._normalize_package(parsed, package)
             packages.append(normalized_package)
-            
+
         top_components = self._pack_components(packages)
         self._normalized_sbom = top_components
         return self._normalized_sbom
@@ -215,11 +215,12 @@ class ParsedSPDXDoc:
         try:
             return self.objects['extracted_text'][license_id]
         except Exception as e:
+            logging.debug(f'_lookup_extracted_text raised an exception: {e}')
             return None
 
     def object_license(self, spdxid):
         obj = self.object(spdxid)
-        
+
         if not obj:
             return "missing"
 
@@ -233,7 +234,7 @@ class ParsedSPDXDoc:
 
                 return obj.license_concluded
         except Exception as e:
-            logging.debug("exception: " + str(e))
+            logging.debug(f'object_licens raised an exception: {e}')
         license_declared = str(obj.license_declared)
         if license_declared != 'NOASSERTION':
             if license_declared.startswith('LicenseRef'):
@@ -304,9 +305,9 @@ class ParsedSPDXDoc:
                 else:
                     normalized_license = ' AND '.join([x['license'] for x in lookedup['normalized']])
                 self.objects['extracted_text'][lic.license_id] = normalized_license
-                
+
         except Exception as e:
-            logging.debug(f'Updating objects raised an exception: ' + str(e))
+            logging.debug(f'Updating objects raised an exception: {e}')
 
     def normalized_sbom(self):
         return self._normalized_sbom
