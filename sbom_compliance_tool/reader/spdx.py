@@ -11,6 +11,7 @@ import logging
 from sbom_compliance_tool.reader.sbom_reader import SBoMReader
 
 from licomp.interface import UseCase
+from lookup_license.lookuplicense import LookupLicense
 
 from spdx_tools.spdx.parser.parse_anything import parse_file
 from spdx_tools.spdx.model.relationship import RelationshipType
@@ -136,15 +137,18 @@ class SPDXSBoMReader(SBoMReader):
         relations, relations_inv = parsed_doc.relations(package)
         packages = []
         for spdx1, rel, spdx2 in relations:
+            if spdx2.startswith('SPDXRef-DOCUMENT'):
+                continue
             packages.append(self._normalize_sub_package(parsed_doc, spdx1, rel, spdx2))
         for spdx1, rel, spdx2 in relations_inv:
-            packages.append(self._normalize_sub_package(parsed_doc, spdx1, rel, spdx2, inverted=True))
+            if spdx1.startswith('SPDXRef-DOCUMENT'):
+                continue
+            packages.append(self._normalize_sub_package(parsed_doc, spdx2, rel, spdx1))
 
         packed_component = self._component(parsed_doc.object_name(package),
                                            parsed_doc.object_version(package),
                                            [],
                                            packages)
-
         return packed_component
 
     def normalize_sbom_file(self, file_path):
@@ -154,7 +158,8 @@ class SPDXSBoMReader(SBoMReader):
 
         packages = []
         for package in parsed.packages():
-            packages.append(self._normalize_package(parsed, package))
+            normalized_package = self._normalize_package(parsed, package)
+            packages.append(normalized_package)
 
         top_components = self._pack_components(packages)
         self._normalized_sbom = top_components
@@ -177,7 +182,9 @@ class ParsedSPDXDoc:
         self.objects = {
             'packages': {},
             'files': {},
+            'extracted_text': {},
         }
+        self.ll = LookupLicense()
         self._read_spdx_sbom(file_path)
 
     def _read_spdx_sbom(self, file_path):
@@ -202,20 +209,39 @@ class ParsedSPDXDoc:
 
         return ''
 
+    def _lookup_extracted_text(self, license_id):
+        """lookup license, provided as extracted license text in the
+        SBoM, in the objects dict"""
+        try:
+            return self.objects['extracted_text'][license_id]
+        except Exception as e:
+            logging.debug(f'_lookup_extracted_text raised an exception: {e}')
+            return None
+
     def object_license(self, spdxid):
         obj = self.object(spdxid)
+
         if not obj:
             return "missing"
 
         try:
-            return obj.license_concluded
-        except Exception as e:
-            logging.debug(f'Failed getting license_concluded for {spdxid}. Exception: {e}')
+            license_concluded = str(obj.license_concluded)
+            if license_concluded != 'NOASSERTION':
+                if str(obj.license_concluded).startswith('LicenseRef'):
+                    lookedup = self._lookup_extracted_text(str(obj.license_concluded))
+                    if lookedup:
+                        return lookedup
 
-        try:
-            return obj.license_declared
+                return obj.license_concluded
         except Exception as e:
-            logging.debug(f'Failed getting license_declared for {spdxid}. Exception: {e}')
+            logging.debug(f'object_licens raised an exception: {e}')
+        license_declared = str(obj.license_declared)
+        if license_declared != 'NOASSERTION':
+            if license_declared.startswith('LicenseRef'):
+                lookedup = self._lookup_extracted_text(license_declared)
+                if lookedup:
+                    return lookedup
+            return license_declared
 
         logging.debug(f'Failed getting license for {spdxid}, returning empty string')
         return ''
@@ -269,6 +295,19 @@ class ParsedSPDXDoc:
 
         for snippet in self.doc.snippets:
             self.objects['snippets'][snippet.spdx_id] = snippet
+
+        try:
+            for lic in self.doc.extracted_licensing_info:
+                lookedup = self.ll.lookup_license_text(lic.extracted_text)
+                identification = lookedup['identification']
+                if identification == 'flame':
+                    normalized_license = ' AND '.join(lookedup['normalized'])
+                else:
+                    normalized_license = ' AND '.join([x['license'] for x in lookedup['normalized']])
+                self.objects['extracted_text'][lic.license_id] = normalized_license
+
+        except Exception as e:
+            logging.debug(f'Updating objects raised an exception: {e}')
 
     def normalized_sbom(self):
         return self._normalized_sbom
