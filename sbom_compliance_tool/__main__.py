@@ -18,11 +18,21 @@ from licomp.interface import UseCase
 from licomp.interface import Provisioning
 from licomp.interface import Modification
 
+from licomp.return_codes import ReturnCodes
+from licomp.return_codes import compatibility_status_to_returncode
+
 from sbom_compliance_tool.config import long_description
 from sbom_compliance_tool.config import program_name
 from sbom_compliance_tool.config import sbom_compliance_tool_version
 from sbom_compliance_tool.config import epilog
 
+from licomp_toolkit.format import LicompToolkitFormatter
+from licomp_toolkit.toolkit import LicompToolkit
+
+def supported_resources(output_format):
+    licomp_toolkit = LicompToolkit()
+    formatter = LicompToolkitFormatter.formatter(output_format)
+    return formatter.format_licomp_resources(licomp_toolkit.licomp_resources_long()), ReturnCodes.LICOMP_OK.value, False
 
 def main():
 
@@ -37,6 +47,11 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
     logging.info("SBoM Compliance Tool")
 
+    if args.func == supported_resources:
+        resources, status, errs = supported_resources(args.output_format)
+        print(resources)
+        sys.exit(0)
+    
     compliance = SBoMComplianceTool()
     logging.info(f'Tool: {compliance}')
 
@@ -87,9 +102,20 @@ def get_parser():
                         help='Output debug information.',
                         default=False)
 
+
+    parser.add_argument('-r', '--resources',
+                        type=str,
+                        action='append',
+                        help='use specified licomp resource. For a list use the commands \'supported-resources\'. Use \'all\' to use all',
+                        default=[])
+
     subparsers = parser.add_subparsers(help='Sub commands')
     parser_v = subparsers.add_parser('verify',
                                      help='Verify license compatibility between the licenses for packages in an SBoM.')
+
+    parser_sr = subparsers.add_parser('supported-resources',
+                                     help='List all supported Licomp resources')
+    parser_sr.set_defaults(which="supported_resources", func=supported_resources)
 
     parser_v.add_argument("sbom_file")
 
