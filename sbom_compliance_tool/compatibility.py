@@ -4,6 +4,7 @@
 
 import logging
 
+from licomp_toolkit.toolkit import LicompToolkit
 from licomp_toolkit.toolkit import ExpressionExpressionChecker
 from flame.license_db import FossLicenses
 
@@ -35,7 +36,7 @@ class SBoMCompatibility():
             logging.debug('Could not identify license using flame, returning input.')
             return lic
 
-    def _package_compatibility_report(self, package, usecase, provisioning, modified):
+    def _package_compatibility_report(self, package, usecase, provisioning, modified, resources):
         outbound = package["license"]
         report = {
             'name': package["name"],
@@ -43,7 +44,6 @@ class SBoMCompatibility():
             'license': outbound,
         }
 
-        resources = ['licomp_reclicense', 'licomp_osadl', 'licomp_proprietary']
         compat_checker = ExpressionExpressionChecker()
         deps = []
         top_compat = None
@@ -73,13 +73,16 @@ class SBoMCompatibility():
 
         return report
 
-    def compatibility_report(self, sbom, usecase, provisioning, modified):
+    def compatibility_report(self, sbom, usecase, provisioning, modified, resources=None):
         sbom_content = sbom['sbom']
         sbom_packages = sbom_content['packages']
 
+        if not resources:
+            resources = LicompToolkit().licomp_standard_resources()
+
         packages_report = []
         for s_pkg in sbom_packages:
-            package_report = self._package_compatibility_report(s_pkg, usecase, provisioning, modified)
+            package_report = self._package_compatibility_report(s_pkg, usecase, provisioning, modified, resources)
             packages_report.append(package_report)
 
         return {

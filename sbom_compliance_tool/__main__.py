@@ -18,11 +18,21 @@ from licomp.interface import UseCase
 from licomp.interface import Provisioning
 from licomp.interface import Modification
 
+from licomp.return_codes import ReturnCodes
+
 from sbom_compliance_tool.config import long_description
 from sbom_compliance_tool.config import program_name
 from sbom_compliance_tool.config import sbom_compliance_tool_version
 from sbom_compliance_tool.config import epilog
 
+from licomp_toolkit.format import LicompToolkitFormatter
+from licomp_toolkit.toolkit import LicompToolkit
+from licomp_toolkit.utils import resources_to_use
+
+def supported_resources(output_format):
+    licomp_toolkit = LicompToolkit()
+    formatter = LicompToolkitFormatter.formatter(output_format)
+    return formatter.format_licomp_resources(licomp_toolkit.licomp_resources_long()), ReturnCodes.LICOMP_OK.value, False
 
 def main():
 
@@ -37,6 +47,18 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
     logging.info("SBoM Compliance Tool")
 
+    if args.which == 'supported_resources':
+        resources, status, errs = supported_resources('text')
+        print(resources)
+        sys.exit(0)
+
+    # Check which resources to use
+    resources, unsupported = resources_to_use(args)
+    if unsupported:
+        logging.warning(f'Resource(s) {", ".join(unsupported)} is/are not supported')
+        sys.exit(ReturnCodes.LICOMP_UNSUPPORTED_RESOURCE.value)
+
+    # Read SBoM
     compliance = SBoMComplianceTool()
     logging.info(f'Tool: {compliance}')
 
@@ -44,18 +66,23 @@ def main():
     normalized_sbom = compliance.from_sbom_file(args.sbom_file)
 
     if not normalized_sbom:
-        logging.info(f'Failed normalizing: {args.sbom_file}')
+        logging.warning(f'Failed normalizing: {args.sbom_file}')
         sys.exit(1)
 
+    # Check compatibility for SBoM
     logging.info(f'Check compatibility: {args.sbom_file}')
     compatibility = SBoMCompatibility()
     report = compatibility.compatibility_report(normalized_sbom,
                                                 UseCase.usecase_to_string(UseCase.LIBRARY),
                                                 Provisioning.provisioning_to_string(Provisioning.BIN_DIST),
-                                                Modification.modification_to_string(Modification.UNMODIFIED))
+                                                Modification.modification_to_string(Modification.UNMODIFIED),
+                                                resources)
+
+    # Format the compatibility report
+    formatter = SBoMReportFormatterFactory.formatter(args.output_format)
     logging.debug(f'Report: {report}')
 
-    formatter = SBoMReportFormatterFactory.formatter(args.output_format)
+    # Print the report
     formatted_report = formatter.format(report)
 
     print(formatted_report)
@@ -87,9 +114,20 @@ def get_parser():
                         help='Output debug information.',
                         default=False)
 
+    parser.add_argument('-r', '--resources',
+                        type=str,
+                        action='append',
+                        help='use specified licomp resource. For a list use the commands \'supported-resources\'. Use \'all\' to use all',
+                        default=[])
+
     subparsers = parser.add_subparsers(help='Sub commands')
     parser_v = subparsers.add_parser('verify',
                                      help='Verify license compatibility between the licenses for packages in an SBoM.')
+    parser_v.set_defaults(which="verify")
+
+    parser_sr = subparsers.add_parser('supported-resources',
+                                      help='List all supported Licomp resources')
+    parser_sr.set_defaults(which="supported_resources")
 
     parser_v.add_argument("sbom_file")
 
