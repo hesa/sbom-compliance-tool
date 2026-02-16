@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-sbom_compliance_tool_version = '0.0.10'
+sbom_compliance_tool_version = '0.0.11'
 
 program_name = 'sbom-compliance-tool'
 
