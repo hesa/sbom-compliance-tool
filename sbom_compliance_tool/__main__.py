@@ -19,7 +19,6 @@ from licomp.interface import Provisioning
 from licomp.interface import Modification
 
 from licomp.return_codes import ReturnCodes
-from licomp.return_codes import compatibility_status_to_returncode
 
 from sbom_compliance_tool.config import long_description
 from sbom_compliance_tool.config import program_name
@@ -70,7 +69,7 @@ def main():
         logging.warning(f'Failed normalizing: {args.sbom_file}')
         sys.exit(1)
 
-    # Check compatibility for SBoM 
+    # Check compatibility for SBoM
     logging.info(f'Check compatibility: {args.sbom_file}')
     compatibility = SBoMCompatibility()
     report = compatibility.compatibility_report(normalized_sbom,
@@ -79,7 +78,7 @@ def main():
                                                 Modification.modification_to_string(Modification.UNMODIFIED),
                                                 resources)
 
-    # Format the compatibility report 
+    # Format the compatibility report
     formatter = SBoMReportFormatterFactory.formatter(args.output_format)
     logging.debug(f'Report: {report}')
 
@@ -115,7 +114,6 @@ def get_parser():
                         help='Output debug information.',
                         default=False)
 
-
     parser.add_argument('-r', '--resources',
                         type=str,
                         action='append',
@@ -128,7 +126,7 @@ def get_parser():
     parser_v.set_defaults(which="verify")
 
     parser_sr = subparsers.add_parser('supported-resources',
-                                     help='List all supported Licomp resources')
+                                      help='List all supported Licomp resources')
     parser_sr.set_defaults(which="supported_resources")
 
     parser_v.add_argument("sbom_file")
